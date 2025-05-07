@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { TextField, InputAdornment, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -8,11 +8,11 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ 
-  value, 
-  onChange, 
-  placeholder = 'Search for anime...' 
-}) => {
+const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(({
+  value,
+  onChange,
+  placeholder = 'Search for anime...'
+}, ref) => {
   return (
     <Box sx={{ width: '100%', mb: 3 }}>
       <TextField
@@ -21,6 +21,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        inputRef={ref}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -36,6 +37,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       />
     </Box>
   );
-};
+});
 
 export default SearchBar;

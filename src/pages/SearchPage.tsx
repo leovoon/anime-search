@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import Header from '../components/common/Header';
@@ -7,6 +7,8 @@ import AnimeGrid from '../components/anime/AnimeGrid';
 import AnimeGridSkeleton from '../components/anime/AnimeGridSkeleton';
 import Pagination from '../components/common/Pagination';
 import ErrorState from '../components/common/ErrorState';
+import BackToTop from '../components/common/BackToTop';
+import SEOHelmet from '../components/common/SEOHelmet';
 import useDebounce from '../hooks/useDebounce';
 import useAnimeSearch from '../hooks/useAnimeSearch';
 import useTopAnime from '../hooks/useTopAnime';
@@ -17,6 +19,9 @@ const SearchPage: React.FC = () => {
   // Jikan API has a maximum limit of 25 items per page
   const [itemsPerPage, setItemsPerPage] = useState<number>(20);
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
+
+  // Reference to the search input for focusing
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Add auto-animate to the results container
   const [resultsRef] = useAutoAnimate({
@@ -52,8 +57,30 @@ const SearchPage: React.FC = () => {
     setPage(1);
   }, [debouncedSearchTerm, itemsPerPage]);
 
+  // Create structured data for the search page
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    'name': 'Anime App',
+    'url': 'https://anime-searchh.vercel.app',
+    'potentialAction': {
+      '@type': 'SearchAction',
+      'target': {
+        '@type': 'EntryPoint',
+        'urlTemplate': 'https://anime-searchh.vercel.app/?search={search_term_string}'
+      },
+      'query-input': 'required name=search_term_string'
+    }
+  };
+
   return (
     <>
+      <SEOHelmet
+        title={debouncedSearchTerm ? `Search results for "${debouncedSearchTerm}"` : "Anime Search"}
+        description="Search and discover anime from our extensive database. Find detailed information about your favorite anime series, movies, and more."
+        canonicalUrl="https://anime-searchh.vercel.app"
+        structuredData={structuredData}
+      />
       <Header title="Anime Search App" />
       <Container
         maxWidth={false}
@@ -65,6 +92,7 @@ const SearchPage: React.FC = () => {
         }}
       >
         <SearchBar
+          ref={searchInputRef}
           value={searchTerm}
           onChange={setSearchTerm}
         />
@@ -136,6 +164,16 @@ const SearchPage: React.FC = () => {
           )}
         </Box>
       </Container>
+
+      {/* Back to top button */}
+      <BackToTop
+        onClick={() => {
+          // Focus the search input when the back to top button is clicked
+          if (searchInputRef.current) {
+            searchInputRef.current.focus();
+          }
+        }}
+      />
     </>
   );
 };

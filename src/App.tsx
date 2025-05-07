@@ -2,6 +2,7 @@ import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { HelmetProvider } from 'react-helmet-async';
 import router from './router';
 
 // Create a theme with purple primary color
@@ -57,12 +58,14 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
