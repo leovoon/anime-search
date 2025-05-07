@@ -25,10 +25,8 @@ const AnimeGridSkeleton: React.FC<AnimeGridSkeletonProps> = ({
         sx={{
           display: 'grid',
           gridTemplateColumns: {
-            xs: 'repeat(1, minmax(0, 1fr))',                     // 1 column on extra small screens
-            sm: 'repeat(2, minmax(0, 1fr))',                     // 2 columns on small screens
-            md: 'repeat(auto-fit, minmax(225px, 1fr))',          // Auto-fit for md screens
-            lg: 'repeat(auto-fill, 225px)'                       // Fixed width columns for lg screens
+            xs: '1fr',          
+            sm: 'repeat(auto-fill, minmax(225px, 225px))'
           },
           gridAutoRows: '1fr',
           gap: { xs: 2, md: 3 },

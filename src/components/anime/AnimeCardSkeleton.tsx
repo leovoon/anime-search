@@ -6,7 +6,7 @@ const AnimeCardSkeleton: React.FC = () => {
     <Card
       sx={{
         width: '100%',
-        maxWidth: '225px',
+        maxWidth: { xs: '100%', sm: '225px' },
         display: 'flex',
         flexDirection: 'column',
       }}
