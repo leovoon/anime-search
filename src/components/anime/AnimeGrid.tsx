@@ -37,7 +37,7 @@ const AnimeGrid: React.FC<AnimeGridProps> = ({ animes }) => {
         sx={{
           display: 'grid',
           gridTemplateColumns: {
-            xs: '1fr',          
+            xs: 'repeat(2, 1fr)',          
             sm: 'repeat(auto-fill, minmax(225px, 225px))'
           },
           gridAutoRows: '1fr',
