@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Fab, Zoom, useScrollTrigger } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 

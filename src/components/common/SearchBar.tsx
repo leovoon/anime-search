@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { TextField, InputAdornment, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
