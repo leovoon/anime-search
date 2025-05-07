@@ -15,7 +15,7 @@ const AnimeGridSkeleton: React.FC<AnimeGridSkeletonProps> = ({
   return (
     <Box sx={{ width: '100%' }}>
       {showTitle && (
-        <Box sx={{ mb: 3 }} flex={{ display: 'flex', flexDirection: 'column' }} alignItems={{ xs: 'center', md: 'left' }}>
+        <Box sx={{ mb: 3 }} flex={{ display: 'flex', flexDirection: 'column' }} alignItems={{ xs: 'center', md: 'start' }}>
           <Skeleton variant="text" width="200px" height={30} animation="wave" />
           <Skeleton variant="text" width="300px" height={24} animation="wave" sx={{ mt: 1 }} />
         </Box>
