@@ -30,8 +30,8 @@ const AnimeGridSkeleton: React.FC<AnimeGridSkeletonProps> = ({
           },
           gridAutoRows: '1fr',
           gap: { xs: 2, md: 3 },
-          justifyContent: { xs: 'center', lg: 'start' },
-          margin: { xs: '0 auto', lg: 0 }
+          justifyContent: { xs: 'center', sm: 'start' },
+          margin: { xs: '0 auto' }
         }}
       >
         {Array(count).fill(0).map((_, index) => (

@@ -20,8 +20,7 @@ interface SEOHelmetProps {
   /**
    * Structured data for rich results (JSON-LD)
    */
-  structuredData?: Record<string, any>;
-  
+  structuredData?: Record<string, unknown>;
   /**
    * Additional meta tags
    */

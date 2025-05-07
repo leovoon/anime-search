@@ -13,8 +13,8 @@ const useAnimeSearch = (query: string, page: number, limit: number = 20) => {
     queryKey: ['animeSearch', query, page, limit],
     queryFn: () => api.searchAnime(query, page, limit),
     enabled: query.length > 0,
-    // staleTime: 5 * 60 * 1000, // 5 minutes
-    // gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     placeholderData: (previousData) => previousData,
   });
 };

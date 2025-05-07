@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Button, Box } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -7,7 +7,6 @@ import Header from '../components/common/Header';
 import ErrorState from '../components/common/ErrorState';
 import AnimeDetails from '../components/anime/AnimeDetails';
 import AnimeDetailsSkeleton from '../components/anime/AnimeDetailsSkeleton';
-import ScrollToTop from '../components/common/ScrollToTop';
 import SEOHelmet from '../components/common/SEOHelmet';
 import api from '../services/api';
 import { AnimeGenre } from '../types/anime';
@@ -15,6 +14,7 @@ import { AnimeGenre } from '../types/anime';
 const DetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     data,
@@ -25,11 +25,42 @@ const DetailPage: React.FC = () => {
     queryKey: ['animeDetail', id],
     queryFn: () => api.getAnimeDetail(id as string),
     enabled: !!id,
-    // staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const handleBack = () => {
-    navigate(-1);
+    const params = new URLSearchParams(location.search);
+    const pageParam = params.get('page');
+    const searchTermParam = params.get('q');
+
+    let navigateTo = '/?';
+    const queryParams = new URLSearchParams();
+
+    if (pageParam) {
+      const page = parseInt(pageParam, 10);
+      if (!isNaN(page) && page >= 1) {
+        queryParams.set('page', page.toString());
+      } else {
+        // Fallback to localStorage if pageParam is invalid
+        const savedPage = localStorage.getItem('animeSearchPage');
+        const fallbackPage = savedPage ? parseInt(savedPage, 10) : 1;
+        queryParams.set('page', (isNaN(fallbackPage) ? 1 : fallbackPage).toString());
+      }
+    } else {
+      // Fallback to localStorage if pageParam is not present
+      const savedPage = localStorage.getItem('animeSearchPage');
+      const fallbackPage = savedPage ? parseInt(savedPage, 10) : 1;
+      queryParams.set('page', (isNaN(fallbackPage) ? 1 : fallbackPage).toString());
+    }
+
+    if (searchTermParam) {
+      queryParams.set('q', searchTermParam);
+
+    }
+    
+    navigateTo += queryParams.toString();
+    navigate(navigateTo);
+
   };
 
   // Create structured data for the anime detail page if data is available
@@ -65,7 +96,6 @@ const DetailPage: React.FC = () => {
           { name: 'keywords', content: `anime, ${data.data.title}, ${data.data.genres.map((g: AnimeGenre) => g.name).join(', ')}` }
         ] : []}
       />
-      <ScrollToTop />
       <Header title="Anime Details" />
       <Container
         maxWidth={false}

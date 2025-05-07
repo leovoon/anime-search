@@ -6,9 +6,11 @@ import type { AnimeData } from '../../types/anime';
 
 interface AnimeGridProps {
   animes: AnimeData[];
+  currentPage: number;
+  searchTerm?: string; // Add searchTerm as an optional prop
 }
 
-const AnimeGrid: React.FC<AnimeGridProps> = ({ animes }) => {
+const AnimeGrid: React.FC<AnimeGridProps> = ({ animes, currentPage, searchTerm }) => {
   // Use auto-animate for the grid container
   const [parent] = useAutoAnimate({
     duration: 300,
@@ -33,11 +35,10 @@ const AnimeGrid: React.FC<AnimeGridProps> = ({ animes }) => {
     <Box sx={{ width: '100%' }}>
       <Box
         ref={parent}
-        className="anime-list"
         sx={{
           display: 'grid',
           gridTemplateColumns: {
-            xs: 'repeat(2, 1fr)',          
+            xs: 'repeat(2, 1fr)',
             sm: 'repeat(auto-fill, minmax(225px, 225px))'
           },
           gridAutoRows: '1fr',
@@ -54,7 +55,7 @@ const AnimeGrid: React.FC<AnimeGridProps> = ({ animes }) => {
               justifyContent: { xs: 'center', lg: 'flex-start' }
             }}
           >
-            <AnimeCard anime={anime} />
+            <AnimeCard anime={anime} currentPage={currentPage} searchTerm={searchTerm} />
           </Box>
         ))}
       </Box>

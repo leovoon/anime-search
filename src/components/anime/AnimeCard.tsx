@@ -7,9 +7,11 @@ import api from '../../services/api';
 
 interface AnimeCardProps {
   anime: AnimeData;
+  currentPage: number;
+  searchTerm?: string;
 }
 
-const AnimeCard: React.FC<AnimeCardProps> = ({ anime }) => {
+const AnimeCard: React.FC<AnimeCardProps> = ({ anime, currentPage, searchTerm }) => {
   const queryClient = useQueryClient();
 
   const handleMouseEnter = () => {
@@ -24,7 +26,7 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime }) => {
     <Card
       component={Link}
       viewTransition
-      to={`/anime/${anime.mal_id}`}
+      to={`/anime/${anime.mal_id}?page=${currentPage}${searchTerm ? `&q=${encodeURIComponent(searchTerm)}` : ''}`}      state={{ page: currentPage, searchTerm: searchTerm }}
       onMouseEnter={handleMouseEnter}
       sx={{
         width: '100%',

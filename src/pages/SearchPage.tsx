@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { useLocation } from 'react-router-dom';
 import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import AnimeGrid from '../components/anime/AnimeGrid';
@@ -13,15 +14,56 @@ import useDebounce from '../hooks/useDebounce';
 import useAnimeSearch from '../hooks/useAnimeSearch';
 import useTopAnime from '../hooks/useTopAnime';
 
+import { useNavigate } from 'react-router-dom';
+
 const SearchPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [page, setPage] = useState<number>(1);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Initialize searchTerm from URL query parameter 'q'
+  const [searchTerm, setSearchTerm] = useState<string>(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('q') || '';
+  });
+  // Initialize page state from localStorage or location state, defaulting to 1
+  const [page, setPage] = useState<number>(() => {
+    // Check URL query parameters first
+    const params = new URLSearchParams(location.search);
+    const pageParam = params.get('page');
+    if (pageParam) {
+      const parsedPage = parseInt(pageParam, 10);
+      if (!isNaN(parsedPage) && parsedPage >= 1) {
+        return parsedPage;
+      }
+    }
+
+    // Fallback to localStorage
+    const savedPage = localStorage.getItem('animeSearchPage');
+    if (savedPage) {
+      const parsedPage = parseInt(savedPage, 10);
+      return isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+    }
+
+    return 1;
+  });
+
   // Jikan API has a maximum limit of 25 items per page
-  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
+    const savedItemsPerPage = localStorage.getItem('animeSearchItemsPerPage');
+    if (savedItemsPerPage) {
+      const parsedItems = parseInt(savedItemsPerPage, 10);
+      return isNaN(parsedItems) || parsedItems > 25 || parsedItems < 1 ? 20 : parsedItems;
+    }
+    return 20;
+  });
+
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
   // Reference to the search input for focusing
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const isInitialMount = useRef(true);
+  const prevDebouncedSearchTermRef = useRef<string>(debouncedSearchTerm);
+  const prevItemsPerPageRef = useRef<number>(itemsPerPage);
 
   // Add auto-animate to the results container
   const [resultsRef] = useAutoAnimate({
@@ -52,10 +94,50 @@ const SearchPage: React.FC = () => {
   const error = debouncedSearchTerm ? searchError : topAnimeError;
   const refetch = debouncedSearchTerm ? refetchSearch : refetchTopAnime;
 
-  // Reset to page 1 when search term or items per page changes
-  React.useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchTerm, itemsPerPage]);
+  // Reset to page 1 when search term or items per page changes, but not on initial load if page is from URL
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Store initial values after the first render completes and initial page is set
+      prevDebouncedSearchTermRef.current = debouncedSearchTerm;
+      prevItemsPerPageRef.current = itemsPerPage;
+      return;
+    }
+
+    // Only reset to page 1 if debouncedSearchTerm or itemsPerPage *actually change* from their previous values
+    if (
+      debouncedSearchTerm !== prevDebouncedSearchTermRef.current ||
+      itemsPerPage !== prevItemsPerPageRef.current
+    ) {
+      setPage(1);
+    }
+
+    // Update previous values for the next render
+    prevDebouncedSearchTermRef.current = debouncedSearchTerm;
+    prevItemsPerPageRef.current = itemsPerPage;
+  }, [debouncedSearchTerm, itemsPerPage, setPage]);
+
+  // Save page and itemsPerPage to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('animeSearchPage', page.toString());
+  }, [page]);
+
+  useEffect(() => {
+    localStorage.setItem('animeSearchItemsPerPage', itemsPerPage.toString());
+  }, [itemsPerPage]);
+
+  // Update URL when page, debouncedSearchTerm, or itemsPerPage change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedSearchTerm) {
+      params.set('q', debouncedSearchTerm);
+    }
+    params.set('page', page.toString());
+    // navigate(`?${params.toString()}`, { replace: true }); // avoid this causing issue with useeffect reset page
+    // Update URL without triggering a full navigation, preserving history state
+    window.history.replaceState(null, '', `?${params.toString()}`);
+  }, [debouncedSearchTerm, page, itemsPerPage, navigate]);
+
 
   // Create structured data for the search page
   const structuredData = {
@@ -87,7 +169,7 @@ const SearchPage: React.FC = () => {
         sx={{
           maxWidth: '1200px',
           margin: '0 auto',
-          px: { xs: 2, sm: 3, lg: 0 },
+          px: { xs: 2, sm: 3, xl: 0 },
           pb: 4
         }}
       >
@@ -133,7 +215,7 @@ const SearchPage: React.FC = () => {
               </Box>
               {data && data.data && data.data.length > 0 && data.pagination && (
                 <>
-                  <AnimeGrid animes={data.data} />
+                  <AnimeGrid animes={data.data} currentPage={page} />
                   <Pagination
                     onPageChange={setPage}
                     itemsPerPage={itemsPerPage}
@@ -145,7 +227,7 @@ const SearchPage: React.FC = () => {
             </div>
           ) : data && data.data && data.data.length > 0 && data.pagination ? (
             <div key="results">
-              <AnimeGrid animes={data.data} />
+              <AnimeGrid animes={data.data} currentPage={page} searchTerm={debouncedSearchTerm} />
               <Pagination
                 onPageChange={setPage}
                 itemsPerPage={itemsPerPage}
